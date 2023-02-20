@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>File Upload/Download</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="shortcut icon" href="cm.png" type="image/x-icon">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1>File Upload/Download</h1>
+        <form action="http://localhost:3000/upload" method="post" enctype="multipart/form-data" class="mb-3">
+            <div class="form-group">
+                <label for="file">Choose a file:</label>
+                <input type="file" name="file" id="file" class="form-control-file" />
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+        <h2>Files:</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Size</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="file-list">
+                <!-- This will be populated with file data using JavaScript -->
+            </tbody>
+        </table>
+        <h2>Developer - shubham shah</h2>
+    </div>
+    <script>
+        // Use AJAX to fetch the list of files from the server
+        fetch("/files")
+            .then((response) => response.json())
+            .then((data) => {
+                const fileList = document.getElementById("file-list");
+                fileList.innerHTML = "";
+                data.files.forEach((file) => {
+                    const row = document.createElement("tr");
+                    const filenameCell = document.createElement("td");
+                    filenameCell.innerText = file.filename;
+                    const sizeCell = document.createElement("td");
+                    sizeCell.innerText = formatFileSize(file.size);
+                    const downloadCell = document.createElement("td");
+                    const downloadLink = document.createElement("a");
+                    downloadLink.href = `/download/${file.filename}`;
+                    downloadLink.innerText = "Download";
+                    downloadCell.appendChild(downloadLink);
+                    row.appendChild(filenameCell);
+                    row.appendChild(sizeCell);
+                    row.appendChild(downloadCell);
+                    fileList.appendChild(row);
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+
+        // Helper function to format file size in bytes to a human-readable string
+        function formatFileSize(bytes) {
+            const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+            let size = bytes;
+            let i = 0;
+            while (size >= 1024 && i < units.length - 1) {
+                size /= 1024;
+                i++;
+            }
+            return `${size.toFixed(2)} ${units[i]}`;
+        }
+    </script>
+</body>
+
+</html>
